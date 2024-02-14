@@ -40,8 +40,8 @@ public class VeinDiggingMod implements ModInitializer {
 		// Register on-break event
 		CURRENTLY_VEINDIGGING = false;
 		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
-			if (world.isClient()) return;
-			if ((isShiftMining(player, state) || isBindMining(player, state)) && !CURRENTLY_VEINDIGGING) {
+			if (world.isClient() || CURRENTLY_VEINDIGGING) return;
+			if ((isShiftMining(player, state) || isBindMining(player, state)) && player.getMainHandStack().isSuitableFor(state)) {
 				CURRENTLY_VEINDIGGING = true;
 				CURRENT_BLOCK_POS = pos;
 				startVeinDigging(world, player, pos, state);
@@ -145,8 +145,7 @@ public class VeinDiggingMod implements ModInitializer {
 		}
 
 		for (BlockPos blockPos : blocksToBreak) {
-			ItemStack stack = player.getMainHandStack();
-			if (stack.isDamageable() && stack.getDamage() >= stack.getMaxDamage() - 2) {
+			if (player.getMainHandStack().isEmpty()) {
 				break;
 			}
 			((ServerPlayerEntity) player).interactionManager.tryBreakBlock(blockPos);
